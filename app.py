@@ -9,7 +9,6 @@ api = Api(app)
 items = []
 
 jwt = JWT(app,authenticate,identity)
-print(jwt)
 
 class Item(Resource):
     parser = reqparse.RequestParser()
@@ -64,4 +63,4 @@ class ItemList(Resource):
 api.add_resource(Item,'/item/<string:name>')
 api.add_resource(ItemList,'/items')
 
-app.run(port=5004)
+app.run(port=5004,debug=True)
