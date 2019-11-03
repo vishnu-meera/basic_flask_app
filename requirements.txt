@@ -4,6 +4,7 @@ Flask-JWT
 Flask-SQLAlchemy
 Flask-uploads
 uwsgi
+opencv-python
 requests
 matplotlib
 numpy
