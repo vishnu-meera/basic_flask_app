@@ -1,7 +1,7 @@
 requests
 matplotlib
 numpy
-cv2
+opencv-python
 Flask
 Flask-RESTful
 Flask-JWT
