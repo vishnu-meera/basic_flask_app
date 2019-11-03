@@ -2,7 +2,6 @@ requests
 matplotlib
 numpy
 panda
-opencv-python
 Flask
 Flask-RESTful
 Flask-JWT
