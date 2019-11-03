@@ -1,4 +1,10 @@
+requests
+matplotlib
+numpy
+cv2
 Flask
 Flask-RESTful
 Flask-JWT
+Flask-SQLAlchemy
+Flask-uploads
 uwsgi
