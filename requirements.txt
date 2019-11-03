@@ -1,11 +1,10 @@
-uwsgi
-requests
-matplotlib
-numpy
-panda
 Flask
 Flask-RESTful
 Flask-JWT
 Flask-SQLAlchemy
 Flask-uploads
-
+uwsgi
+requests
+matplotlib
+numpy
+panda
