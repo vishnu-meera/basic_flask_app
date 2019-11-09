@@ -58,6 +58,7 @@ class Item(Resource):
                 item = ItemModel(name, **data)
             else:
                 item.price = data['price']
+                item.store_id = data['store_id']
 
             result = item.save_to_db()
             return result, 200
