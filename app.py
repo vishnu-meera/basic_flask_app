@@ -1,66 +1,56 @@
-from flask import Flask,jsonify,request
-from flask_restful import Resource,Api,reqparse
-from flask_jwt import JWT, jwt_required
-# from security import authenticate,identity
+from flask import Flask, jsonify
+from flask_restful import Api
+from flask_jwt import JWT, jwt_required, timedelta
+from security import authenticate, identity as identity_function
+from resources.user import UserRegister
+from resources.item import Item, ItemList
+from resources.shutdown import ServerShutDown
+
+from resources.store import Store, StoreList
+
 
 app = Flask(__name__)
+app.config['JWT_AUTH_URL_RULE'] = '/login'
 app.secret_key = "galieye"
+app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=3600)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
 api = Api(app)
-items = []
 
-# jwt = JWT(app,authenticate,identity)
 
-class Item(Resource):
-    parser = reqparse.RequestParser()
-    parser.add_argument('price',
-        type=float,
-        required=True
-    )
+@app.before_first_request
+def create_tables():
+    db.create_all()
 
-    #@jwt_required()
-    def get(self,name):
-        # item = list(filter(lambda x: x["name"]==name,items))[0]
-        item = next(filter(lambda x: x["name"]==name,items),None)
-        return {"item":item}, 200 if item else 404
 
-    #@jwt_required()
-    def post(self,name):
-        if next(filter(lambda x: x["name"]==name,items),None):
-            return {'message':"An item with name {} is aleardy exists".format(name)}, 400
-        
-        request_data = Item.parser.parse_args()
-        new_item = {"name":name, "price":request_data["price"]}
-        items.append(new_item)
-        return new_item ,201
-    
-    #@jwt_required()
-    def delete(self,name):
-        global items
-        items = list(filter(lambda x: x['name'] !=name, items))
-        return {'message':"item deleted"}
+jwt = JWT(app, authenticate, identity_function)
+@jwt.auth_response_handler
+def customized_response_handler(access_token, identity):
+    return jsonify({
+        'access_token': access_token.decode('utf-8'),
+        'userd_id': identity.id
+    })
 
-    #@jwt_required()
-    def put(self,name):
-        request_data = Item.parser.parse_args()
-        item = next(filter(lambda x: x["name"]==name,items),None)
-        if item is None:
-            item = {"name":name, "price":request_data["price"]}
-            items.append(item)
-        else:
-            item.update(request_data)
 
-        return item ,201
+@jwt.jwt_error_handler
+def customized_error_handler(error):
+    return jsonify({
+        'message': error.description,
+        'code': error.status_code
+    }), error.status_code
 
-        
-class ItemList(Resource):
-    def get(self):
-        return {"items":items}
 
-    def post(self):
-        # request_data = request.get_json()
-        pass
+api.add_resource(Item, '/item/<string:name>')
+api.add_resource(ItemList, '/items')
+api.add_resource(UserRegister, '/register')
+api.add_resource(ServerShutDown, '/shutdown')
+api.add_resource(Store, '/store/<string:name>')
+api.add_resource(StoreList, '/stores')
 
-api.add_resource(Item,'/item/<string:name>')
-api.add_resource(ItemList,'/items')
 
-app.run(port=5004,debug=True)
+if __name__ == "__main__":
+    from db import db
+    db.init_app(app)
+    app.run(port=5004, debug=True)
